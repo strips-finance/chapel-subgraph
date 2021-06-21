@@ -1,0 +1,267 @@
+#################################################
+# Insurance fund
+#################################################
+
+type InsuranceFund @entity {
+  " address of contract "
+  id: ID!
+
+  token: SIPToken
+
+  liquidity: BigDecimal
+  stakedPnl: BigDecimal
+}
+
+
+#################################################
+# Markets and Prices
+#################################################
+
+type Market @entity {
+  " address of contract "
+  id: ID!
+  name: Bytes!
+  assetSymbol: Bytes!
+  token: SLPToken!
+  
+  created: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTransaction: Bytes!
+
+  liquidity: BigDecimal
+  stakedPnl: BigDecimal
+
+  marketPrice: MarketPrice
+  oraclePrice: OraclePrice  
+  marketPriceDaily: MarketPriceDailyChange
+  oraclePriceDaily: OraclePriceDailyChange
+  marketPriceDailyHistory: [MarketPriceDailyChange!]! @derivedFrom(field: "market")
+  oraclePriceDailyHistory: [OraclePriceDailyChange!]! @derivedFrom(field: "market")
+
+}
+
+type OraclePrice @entity {
+  id: ID!
+  market: Market!
+  price: BigDecimal!  
+  timestamp: BigInt!
+}
+
+type OraclePriceHourlyChange @entity {
+  id: ID!
+  market: Market!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: OraclePrice!
+  close: BigDecimal!
+  closeRef: OraclePrice!
+}
+
+type OraclePriceDailyChange @entity {
+  id: ID!
+  market: Market!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: OraclePrice!
+  close: BigDecimal!
+  closeRef: OraclePrice!
+}
+
+
+type MarketPrice @entity {
+  id: ID!
+  market: Market!
+  price: BigDecimal!  
+  timestamp: BigInt!
+}
+
+type MarketPriceHourlyChange @entity {
+  id: ID!
+  market: Market!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: MarketPrice!
+  close: BigDecimal!
+  closeRef: MarketPrice!
+}
+
+type MarketPriceDailyChange @entity {
+  id: ID!
+  market: Market!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: MarketPrice!
+  close: BigDecimal!
+  closeRef: MarketPrice!
+}
+
+
+#################################################
+# Tokens
+#################################################
+
+
+type SLPToken @entity {
+  " Token address "
+  id: ID!
+  
+  symbol: String!
+
+  market: Market!
+
+  totalSupply: BigInt
+}
+
+type SIPToken @entity {
+  " Token address "
+  id: ID!
+
+  insurance: InsuranceFund! 
+ 
+  symbol: String!
+
+  totalSupply: BigInt
+}
+
+
+
+
+#################################################
+# Accounts
+#################################################
+
+type Account @entity {
+  " Account address "
+  id: ID!
+
+  " changes of portfolio "
+  hourly: PortfolioHourlyChange
+  daily: PortfolioDailyChange
+  monthly: PortfolioMonthlyChange
+
+  marketStakes: [MarketStake!]! @derivedFrom(field: "account")
+  insuranceStakes: [InsuranceStake!]! @derivedFrom(field: "account")
+  positions: [Position!]! @derivedFrom(field: "account")
+
+
+  hourlyHistory: [PortfolioHourlyChange!]! @derivedFrom(field: "account")
+  dailyHistory: [PortfolioDailyChange!]! @derivedFrom(field: "account")
+  monthlyHistory: [PortfolioMonthlyChange!]! @derivedFrom(field: "account")
+}
+
+
+type PortfolioValue @entity {
+  id: ID!
+  account: Account!
+
+  total: BigDecimal!
+  timestamp: BigInt!
+}
+
+
+type PortfolioHourlyChange @entity {
+  id: ID!
+  account: Account!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: PortfolioValue!
+  close: BigDecimal!
+  closeRef: PortfolioValue!
+}
+
+type PortfolioDailyChange @entity {
+  id: ID!
+  account: Account!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: PortfolioValue!
+  close: BigDecimal!
+  closeRef: PortfolioValue!
+}
+
+type PortfolioMonthlyChange @entity {
+  id: ID!
+  account: Account!
+  from: BigInt!
+  to: BigInt!
+  open: BigDecimal!
+  openRef: PortfolioValue!
+  close: BigDecimal!
+  closeRef: PortfolioValue!
+}
+
+
+#################################################
+# Staking
+#################################################
+
+type MarketStake @entity {
+  " account_address + asset_address "
+  id: ID!
+
+  market: Market!
+  account: Account!
+
+  slpTotal: BigInt
+  collateralTotal: BigDecimal
+  
+  initialStakedPnl: BigDecimal
+}
+
+type InsuranceStake @entity {
+  " account_address + asset_address "
+  id: ID!
+
+  insurance: InsuranceFund!
+  account: Account!
+
+  sipTotal: BigInt
+  collateralTotal: BigDecimal
+  
+  initialStakedPnl: BigDecimal
+}
+
+
+
+#################################################
+# Positions
+#################################################
+
+enum PositionStatus {
+  Opened
+  Closed
+  Liquidated
+}
+
+enum PositionType {
+  Long
+  Short
+}
+
+type Position @entity {
+  " Equals to: <marketAddress>-<accountAddress>-<index> "
+  id: ID!
+
+  market: Market!
+  account: Account!
+  posIndex: BigInt!
+
+  positionType: PositionType!
+  status: PositionStatus!
+
+  notional: BigDecimal!
+  collateral: BigDecimal!
+  leverage: BigInt!
+  
+  openPrice: BigDecimal!
+  closePrice: BigDecimal
+
+  created: BigInt!
+}
+

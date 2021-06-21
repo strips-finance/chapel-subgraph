@@ -1,0 +1,13 @@
+{
+    "name": "chapel",
+    "chainId": "97",
+    "startBlock": 9923337,
+    "contracts": {
+      "Strips": {
+        "address": "0xE6590133158eb7397834069DE6156dDBb9E7E6cd"
+      },
+      "InsurancePool": {
+        "address": "0xd6D1c65705C1DA58D07Eabd6b93C5721Fc910F75"
+      }
+    }
+}

@@ -1,0 +1,120 @@
+specVersion: 0.0.2
+description: Strips bsc testnet subgraph
+repository: https://github.com/strips-finance/
+schema:
+  file: ./schema.graphql
+
+
+dataSources:
+  - kind: ethereum/contract
+    name: Strips
+    network: {{networkName}}
+    source:
+      address: '{{stripsAddress}}'
+      abi: Strips
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/Strips.ts
+      entities: []
+      abis:
+        - name: Strips
+          file: ../../protocol/artifacts/contracts/strips/Strips.sol/Strips.json
+        - name: ERC20Contract
+          file: ./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+        - name: ERC20NameBytesContract
+          file: ./src/utils/abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytesContract
+          file: ./src/utils/abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: NewMarket(indexed string,indexed string,indexed address,address)
+          handler: handleNewMarket
+        - event: PositionOpened(indexed address,indexed address,indexed bool,int256,int256,int256,int256,uint256)
+          handler: handlePositionOpened
+        - event: PositionClosed(indexed address,indexed address,indexed bool,int256,int256,int256,int256,uint256)
+          handler: handlePositionClosed
+        - event: PositionLiquidated(indexed address,indexed address,indexed bool,int256,int256,int256,address,uint256)
+          handler: handlePositionLiquidated
+        - event: PnlCalcEvent(indexed address,indexed address,indexed uint256,int256,int256)
+          handler: handlePnlCalc
+        - event: OraclePriceUpdatedEvent(indexed address,int256,int256)
+          handler: handleOraclePriceUpdate
+
+  - kind: ethereum/contract
+    name: InsurancePool
+    network: {{networkName}}
+    source:
+      address: '{{insuranceAddress}}'
+      abi: InsurancePool
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/Insurance.ts
+      entities: []
+      abis:
+        - name: InsurancePool
+          file: ../../protocol/artifacts/contracts/strips/pools/InsuranceFund.sol/InsurancePool.json
+        - name: ERC20Contract
+          file: ./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+        - name: ERC20NameBytesContract
+          file: ./src/utils/abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytesContract
+          file: ./src/utils/abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: TokenAdded(indexed address,indexed address)
+          handler: handleSIPTokenAdded
+        - event: LiquidityChanged(indexed address,indexed address,indexed string,int256,int256,int256,int256)
+          handler: handleInsuranceLiquidityChange
+
+templates:
+  - name: LPToken
+    kind: ethereum/contract
+    network: {{networkName}}
+    source:
+      abi: SLPToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/Tokens.ts
+      entities: []
+      abis:
+        - name: SLPToken
+          file: ../../protocol/artifacts/contracts/token/SLPToken.sol/SLPToken.json
+        - name: ERC20Contract
+          file: ./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+        - name: ERC20NameBytesContract
+          file: ./src/utils/abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytesContract
+          file: ./src/utils/abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+
+  - name: IrsMarket
+    kind: ethereum/contract
+    network: {{networkName}}
+    source:
+      abi: IrsMarket
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/Markets.ts
+      entities: []
+      abis:
+        - name: IrsMarket
+          file: ../../protocol/artifacts/contracts/markets/IrsMarket.sol/IrsMarket.json
+        - name: ERC20Contract
+          file: ./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json
+        - name: ERC20NameBytesContract
+          file: ./src/utils/abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytesContract
+          file: ./src/utils/abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: LiquidityChanged(indexed address,indexed address,indexed string,int256,int256,int256,int256)
+          handler: handleMarketLiquidityChange

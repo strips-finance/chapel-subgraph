@@ -1,0 +1,43 @@
+{
+  "name": "testnet-subgraph",
+  "version": "0.1.0",
+  "scripts": {
+    "script": "ts-node scripts",
+    "build": "graph build",
+    "precodegen:local": "rimraf src/generated && yarn script template --deployment local",
+    "precodegen:chapel": "rimraf src/generated && yarn script template --deployment chapel",
+    "codegen:local": "graph codegen subgraph.yaml --output-dir src/generated",
+    "codegen:chapel": "graph codegen subgraph.yaml --output-dir src/generated",
+    "postcodegen:local": "yarn script flatten",
+    "postcodegen:chapel": "yarn script flatten",
+    "predeploy:local": "graph create strips-finance/testnet-subgraph --node http://127.0.0.1:8020 || true",
+    "predeploy:chapel": "graph create strips-finance/testnet-subgraph --node https://api.thegraph.com/deploy/ || true",
+    "deploy:local": "graph deploy strips-finance/test-subgraph --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "deploy:chapel": "graph deploy strips-finance/testnet-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "format": "prettier --write {src,scripts}/{*,**/*}.{ts,json,yaml}",
+    "lint": "yarn prettier --list-different {src,scripts}/{*,**/*}.{ts,json,yaml}"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.20.0",
+    "@graphprotocol/graph-ts": "^0.20.0",
+    "@openzeppelin/contracts": "^4.1.0",
+    "@types/glob": "^7.1.3",
+    "@types/node": "^15.12.2",
+    "@types/yargs": "^17.0.0",
+    "assemblyscript": "^0.19.3",
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "glob": "^7.1.7",
+    "graphql-request": "^3.4.0",
+    "handlebars": "^4.7.7",
+    "moment": "^2.29.1",
+    "prettier": "^2.3.1",
+    "rimraf": "^3.0.2",
+    "truffle": "^5.0.4",
+    "truffle-contract": "^4.0.5",
+    "truffle-hdwallet-provider": "^1.0.4",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4",
+    "yargs": "^17.0.1"
+  }
+}
